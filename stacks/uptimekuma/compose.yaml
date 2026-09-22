@@ -1,0 +1,22 @@
+# Uptime Kuma: monitoring. Configure HTTP/TCP monitors for each service in its UI.
+# No Docker socket needed. It cannot report its own host dying: add an external
+# heartbeat (see brief, open decision 7).
+#
+# The image ships its own healthcheck.
+services:
+  uptime-kuma:
+    image: louislam/uptime-kuma:2.5.4
+    container_name: uptime-kuma
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      TZ: ${TZ:-America/Detroit}
+    volumes:
+      - /srv/appdata/uptimekuma:/app/data
+    mem_limit: 512m
+    labels:
+      diun.watch_repo: "true"
+      diun.include_tags: '^\d+\.\d+\.\d+$$'
+      diun.sort_tags: semver
+      diun.max_tags: "5"

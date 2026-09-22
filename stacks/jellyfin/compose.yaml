@@ -1,0 +1,31 @@
+# Jellyfin: media server. Direct play only on a Pi 4; no hardware transcoding configured.
+#
+# Pinned to 12.0, the new stable line (shipped 2026-09-07; Jellyfin dropped the
+# "10." prefix starting with this release, so this is not "10.12"). This is a fresh
+# install with no existing library, so the "upgrade from 10.11.11 first" migration
+# notes in Jellyfin's release docs do not apply. Third-party plugins may lag behind
+# 12.0's new plugin ABI — check before installing any.
+#
+# The image ships its own healthcheck, so none is defined here.
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:12.0
+    container_name: jellyfin
+    restart: unless-stopped
+    user: "${PUID:-1000}:${PGID:-1000}"
+    ports:
+      - "8096:8096"
+    environment:
+      TZ: ${TZ:-America/Detroit}
+    volumes:
+      - /srv/appdata/jellyfin/config:/config
+      - /srv/appdata/jellyfin/cache:/cache
+      # Read-only: Jellyfin can never write into (or fill the SSD through) the media path,
+      # even if the HDD is unmounted. Empty library, not a full disk.
+      - /srv/media:/media:ro
+    mem_limit: 1g   # placeholder; tune from `docker stats`
+    labels:
+      diun.watch_repo: "true"
+      diun.include_tags: '^\d+\.\d+(\.\d+)?$$'
+      diun.sort_tags: semver
+      diun.max_tags: "5"

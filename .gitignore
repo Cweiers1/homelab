@@ -1,0 +1,2 @@
+# Real env files hold secrets and per-host values. Only .env.example is committed.
+.env

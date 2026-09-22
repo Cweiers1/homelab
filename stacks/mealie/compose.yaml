@@ -1,0 +1,25 @@
+# Mealie: recipe manager. SQLite (default), no Postgres.
+# Container listens on 9000; published on host 9925.
+services:
+  mealie:
+    image: ghcr.io/mealie-recipes/mealie:v3.25.1
+    container_name: mealie
+    restart: unless-stopped
+    ports:
+      - "9925:9000"
+    environment:
+      ALLOW_SIGNUP: "false"
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+      TZ: ${TZ:-America/Detroit}
+      BASE_URL: ${BASE_URL:-http://localhost:9925}
+      MAX_WORKERS: "1"
+      WEB_CONCURRENCY: "1"
+    volumes:
+      - /srv/appdata/mealie:/app/data
+    mem_limit: 1000m
+    labels:
+      diun.watch_repo: "true"
+      diun.include_tags: '^v\d+\.\d+\.\d+$$'
+      diun.sort_tags: semver
+      diun.max_tags: "5"

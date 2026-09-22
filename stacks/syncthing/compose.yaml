@@ -1,0 +1,27 @@
+# Syncthing: file sync. Host networking so local discovery (LAN broadcast) works;
+# a bridge network would break it. GUI is on 8384, sync on 22000, discovery on 21027.
+# Syncthing is not a backup: deletions propagate to every device.
+#
+# The image ships its own healthcheck.
+services:
+  syncthing:
+    image: syncthing/syncthing:2.1.5
+    container_name: syncthing
+    hostname: pi-syncthing
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+      TZ: ${TZ:-America/Detroit}
+      # Reachable from the LAN. Set a GUI password on first visit.
+      STGUIADDRESS: 0.0.0.0:8384
+    volumes:
+      # Config lands in /var/syncthing/config; default sync folder in /var/syncthing/Sync.
+      - /srv/appdata/syncthing:/var/syncthing
+    mem_limit: 512m
+    labels:
+      diun.watch_repo: "true"
+      diun.include_tags: '^\d+\.\d+\.\d+$$'
+      diun.sort_tags: semver
+      diun.max_tags: "5"

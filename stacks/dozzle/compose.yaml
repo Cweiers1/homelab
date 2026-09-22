@@ -1,0 +1,22 @@
+# Dozzle: live log viewer. Container port is 8080, published on host 8888.
+# No auth by default and it can read every container's logs, so LAN/tailnet only.
+services:
+  dozzle:
+    image: amir20/dozzle:v11.0.1
+    container_name: dozzle
+    restart: unless-stopped
+    ports:
+      - "8888:8080"
+    environment:
+      DOZZLE_NO_ANALYTICS: "true"
+      TZ: ${TZ:-America/Detroit}
+    volumes:
+      # :ro does not limit what the socket API can do. Still effectively root.
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /srv/appdata/dozzle:/data
+    mem_limit: 128m
+    labels:
+      diun.watch_repo: "true"
+      diun.include_tags: '^v\d+\.\d+\.\d+$$'
+      diun.sort_tags: semver
+      diun.max_tags: "5"

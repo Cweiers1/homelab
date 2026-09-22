@@ -1,0 +1,27 @@
+# MeTube: web UI over yt-dlp (YouTube to mp3/mp4).
+#
+# Deliberate exception to image pinning: yt-dlp breaks every few weeks when YouTube
+# changes, so a stale pin means a broken converter. Update routine:
+#   docker compose pull && docker compose up -d
+# Diun watches the tag's digest and tells you when a new build exists.
+#
+# Downloads land on the SSD until the HDDs are connected. Keep an eye on the size.
+services:
+  metube:
+    image: ghcr.io/alexta69/metube:latest
+    container_name: metube
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+      TZ: ${TZ:-America/Detroit}
+      DOWNLOAD_DIR: /downloads
+      # Optional: use nightly yt-dlp builds, upgraded and restarted daily at this time (HH:MM).
+      # Fixes YouTube breakage faster, at the cost of a daily restart. Uncomment to enable.
+      # YTDL_NIGHTLY_UPDATE_TIME: "04:00"
+    volumes:
+      - /srv/downloads:/downloads
+    mem_limit: 768m
+    cpus: 2.0   # keep ffmpeg from starving Jellyfin
